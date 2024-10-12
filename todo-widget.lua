@@ -14,6 +14,9 @@ local todo_widget = awful.popup({
 	visible = false,
 })
 
+local input_prompt = awful.widget.prompt()
+
+-- Add a background to make it more visible
 local function read_tasks_from_file()
 	local tasks = dofile("test.lua")
 	return tasks
@@ -35,12 +38,21 @@ local function update_todo_widget(tasks)
 			widget = wibox.widget.textbox,
 		}))
 	end
+
+	todo_widget.widget:add(input_prompt)
 end
 
 --Toggle the widget on and off
 local function toggle_todo_widget()
 	local tasks = read_tasks_from_file()
 	update_todo_widget(tasks)
+
+	if todo_widget.visible == false then
+		awful.prompt.run({
+			prompt = "New task: ",
+			textbox = input_prompt.widget,
+		})
+	end
 	todo_widget.visible = not todo_widget.visible
 end
 
