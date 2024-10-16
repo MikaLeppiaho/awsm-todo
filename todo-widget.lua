@@ -41,15 +41,39 @@ local function update_todo_widget(tasks)
 
 	todo_widget.widget:add(input_prompt)
 end
+--Append task to file
+local function append_to_file(tasks)
+	local file = io.open("test.lua", "w")
+	if file then
+		file:write("return {\n")
+		for _, task in ipairs(tasks) do
+			file:write(string.format("    { task = %q, completed = %s },\n", task.task, tostring(task.completed)))
+		end
+		file:write("}\n")
+		file:close()
+	else
+		print("Error: Could not open file for writing.")
+	end
+end
+
+-- Add new tasks
+local function handle_input(input)
+	if input and #input > 0 then
+		local tasks = read_tasks_from_file()
+		table.insert(tasks, { task = input, completed = false })
+		append_to_file(tasks)
+		update_todo_widget(tasks)
+	end
+end
 
 --Toggle the widget on and off
 local function toggle_todo_widget()
 	local tasks = read_tasks_from_file()
 	update_todo_widget(tasks)
-
 	if todo_widget.visible == false then
 		awful.prompt.run({
 			prompt = "New task: ",
+			exe_callback = handle_input,
 			textbox = input_prompt.widget,
 		})
 	end
